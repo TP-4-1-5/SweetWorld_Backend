@@ -109,3 +109,36 @@ def deletefromfavorite(request):
             user.save()
             return JsonResponse({"code": 200, 'answer': str(user.favorites)})
     return JsonResponse({'code': 405, 'answer': 'You need to use POST'})
+
+
+def getproductlistwithname(request):
+    if request.method == "GET":
+        name = request.GET.get('name')
+        productss = Product.objects.all()
+        products = []
+        for product in productss:
+            if name in product.name:
+                products.append(product)
+        answer = {}
+        num = 1
+        page = 1
+        page_body = []
+        for product in products:
+            page_body.append({
+                "id": product.id,
+                "name": product.name,
+                "description": product.description,
+                "price": product.price,
+                "image": str(product.image),
+                "category": str(product.category.name),
+            })
+            num += 1
+            if num == 10:
+                num = 1
+                answer.update({page: page_body})
+                page += 1
+                page_body = []
+        if len(page_body) != 0:
+            answer.update({page: page_body})
+        return JsonResponse({'code': 200, "answer": answer})
+    return JsonResponse({'code': 405, 'answer': 'You need to use GET'})
