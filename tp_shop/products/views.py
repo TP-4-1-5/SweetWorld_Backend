@@ -110,6 +110,16 @@ def deletefromfavorite(request):
             return JsonResponse({"code": 200, 'answer': str(user.favorites)})
     return JsonResponse({'code': 405, 'answer': 'You need to use POST'})
 
+def getcommentslist(request):
+    if request.method == "GET":
+        id = int(request.GET.get("id"))
+        products = Product.objects.filter(id=id)
+        for product in products:
+            answer = product.comments.split(",")
+            answer = list(map(int, answer[1:len(answer) - 1]))
+            return JsonResponse({"code": 200, "answer": answer})
+    return JsonResponse({'code': 405, 'answer': 'You need to use GET'})
+
 
 def getproductlistwithname(request):
     if request.method == "GET":
@@ -142,3 +152,5 @@ def getproductlistwithname(request):
             answer.update({page: page_body})
         return JsonResponse({'code': 200, "answer": answer})
     return JsonResponse({'code': 405, 'answer': 'You need to use GET'})
+
+

@@ -7,5 +7,6 @@ urlpatterns = [
     path('addtofavorite', views.addtofavorite, name='addtofavorite'),
     path('deletefromfavorite', views.deletefromfavorite, name='deletefromravorite'),
     path('getproductlistwithcategory', views.getproductlistwithcategory, name="getproductlistwithcategory"),
-    path('getproductlistwithname', views.getproductlistwithname, name='getproductlistwithname')
+    path('getproductlistwithname', views.getproductlistwithname, name='getproductlistwithname'),
+    path('getcommentslist', views.getcommentslist, name='getcommentslist')
 ]
