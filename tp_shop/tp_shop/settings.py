@@ -105,7 +105,7 @@ DATABASES = {
         'NAME': "tp_shop",
         'USER': "David",
         'PASSWORD': "david_sduk",
-        'HOST': "db",
+        'HOST': "51.250.30.255",
         'PORT': "5432",
     }
 }
