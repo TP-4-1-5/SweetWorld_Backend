@@ -21,4 +21,9 @@ from . import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('users/', include('users.urls')),
+    path('productscategory/', include('productscategory.urls')),
+    path('products/', include('products.urls')),
+    path('comments/', include('comments.urls')),
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ]
