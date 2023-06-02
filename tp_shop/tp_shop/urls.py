@@ -18,6 +18,7 @@ from django.urls import path, include, re_path
 import users, productscategory, products, comments
 from django.views.static import serve
 from . import settings
+from .yasg import urlpatterns1
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,3 +28,4 @@ urlpatterns = [
     path('comments/', include('comments.urls')),
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ]
+urlpatterns += urlpatterns1

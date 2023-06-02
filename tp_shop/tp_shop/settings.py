@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'products',
     'corsheaders',
     'comments',
+    'drf_yasg',
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR)
