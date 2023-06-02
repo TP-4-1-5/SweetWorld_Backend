@@ -1,11 +1,20 @@
-from django.shortcuts import render
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from .models import Comment
-from django.http import JsonResponse
-import json
+from .serializers import CommentSerializer, CommentAddSerializer, CommentDeleteSerializer
+from rest_framework import generics, status
+from rest_framework.generics import CreateAPIView, UpdateAPIView
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from products.models import Product
 
-def getcommentslist(request):
-    if request.method == "GET":
+
+
+class CommentListView(APIView):
+    def get(self, request):
+        """
+                                            Получить все комментарии
+                        """
         comment = Comment.objects.all()
         comments = []
         for comm in comment:
@@ -15,53 +24,85 @@ def getcommentslist(request):
                 "username": comm.username,
                 "description": comm.description
             })
-        return JsonResponse({"code": 200, "answer": comments})
-    return JsonResponse({'code': 405, 'answer': 'You need to use GET'})
+        return Response({"code": 200, "answer": comments})
 
-def getcomment(request):
-    if request.method == "GET":
+
+class CommentView(APIView):
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_QUERY, description='id',
+                              type=openapi.TYPE_INTEGER),
+        ]
+    )
+    def get(self, request):
+        """
+                                                    Получить комментарий по id комментария
+                                """
         id = request.GET.get("id")
         comments = Comment.objects.filter(id=id)
-        for comment in comments:
-            return JsonResponse({"code": 200, "answer": {
+        if comments:
+            comment = comments.first()
+            data = {
                 "id": comment.id,
                 "product": comment.product,
                 "username": comment.username,
                 "description": comment.description
-            }})
-    return JsonResponse({'code': 405, 'answer': 'You need to use GET'})
+            }
+            return Response({"code": 200, "answer": data})
+        else:
+            return Response({'code': 404, 'answer': 'Comment not found'})
 
-def post(request):
-    if request.method == "POST":
-        json_data = json.loads(request.body)
-        comment = Comment()
-        comment.username = json_data["username"]
-        comment.product = json_data["product"]
-        comment.description = json_data["description"]
-        product_id = json_data["product_id"]
-        comment.save()
-        products = Product.objects.filter(id=product_id)
-        for product in products:
-            product.comments += str(comment.id) + ","
-            product.save()
-        answer = {
-            "id" : comment.id,
-            "product" : comment.product,
-            "username" : comment.username,
-            "description" : comment.description
-        }
-        return JsonResponse({"code": 200, "answer": answer})
-    return JsonResponse({'code': 405, 'answer': 'You need to use POST'})
+class CreateCommentView(CreateAPIView):
+    """
+                                    Добавить комментарий
+                """
+    serializer_class = CommentAddSerializer
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            comment = Comment()
+            comment.username = serializer.validated_data["username"]
+            comment.product = serializer.validated_data["product"]
+            comment.description = serializer.validated_data["description"]
+            product_id = serializer.validated_data["product_id"]
+            comment.save()
+            products = Product.objects.filter(id=product_id)
+            for product in products:
+                product.comments += str(comment.id) + ","
+                product.save()
+            answer = {
+                "id": comment.id,
+                "product": comment.product,
+                "username": comment.username,
+                "description": comment.description
+            }
+        return Response({"code": 200, "answer": answer})
 
-def delete(request):
-    if request.method == "POST":
-        json_data = json.loads(request.body)
-        id = json_data["id"]
-        product_id = json_data["product_id"]
-        products = Product.objects.filter(id=product_id)
-        for product in products:
-            product.comments = product.comments.replace(str(id)+',', '')
-            product.save()
-        Comment.objects.get(id = id).delete()
-        return JsonResponse({"code": 200, "answer": "Delete"})
-    return JsonResponse({'code': 405, 'answer': 'You need to use POST'})
+
+class DeleteCommentView(CreateAPIView):
+    serializer_class = CommentDeleteSerializer
+    def post(self, request):
+        """
+                                           Удалить комментарий
+                        """
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            id = serializer.validated_data["id"]
+            product_id = serializer.validated_data["product_id"]
+
+            if id is None or product_id is None:
+                return Response({"error": "Missing 'id' or 'product_id' in request data"},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            products = Product.objects.filter(id=product_id)
+            for product in products:
+                product.comments = product.comments.replace(str(id) + ',', '')
+                product.save()
+
+            try:
+                comment = Comment.objects.get(id=id)
+                comment.delete()
+            except Comment.DoesNotExist:
+                return Response({"error": "Comment not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({"code": 200, "answer": "Delete"}, status=status.HTTP_200_OK)

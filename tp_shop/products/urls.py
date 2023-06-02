@@ -1,12 +1,14 @@
 from django.urls import path
 from . import views
+from .views import ProductView, ProductListView, ProductListWithCategoryView, AddToFavoritesView, \
+    DeleteFromFavoritesView, ProductListWithNameView, GetProductComments
 
 urlpatterns = [
-    path('getproduct', views.getproduct, name='getproduct'),
-    path('getproductlist', views.getproductlist, name='getproductlist'),
-    path('addtofavorite', views.addtofavorite, name='addtofavorite'),
-    path('deletefromfavorite', views.deletefromfavorite, name='deletefromravorite'),
-    path('getproductlistwithcategory', views.getproductlistwithcategory, name="getproductlistwithcategory"),
-    path('getproductlistwithname', views.getproductlistwithname, name='getproductlistwithname'),
-    path('getcommentslist', views.getcommentslist, name='getcommentslist')
+    path('getproduct', ProductView.as_view(), name='getproduct'),
+    path('getproductlist', ProductListView.as_view(), name='getproductlist'),
+    path('getproductlistwithcategory', ProductListWithCategoryView.as_view(), name="getproductlistwithcategory"),
+    path('addtofavorite', AddToFavoritesView.as_view(), name='addtofavorite'),
+    path('deletefromfavorite', DeleteFromFavoritesView.as_view(), name='deletefromravorite'),
+    path('getcommentslist', GetProductComments.as_view(), name='getcommentslist'),
+    path('getproductlistwithname', ProductListWithNameView.as_view(), name='getproductlistwithname'),
 ]
