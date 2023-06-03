@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'products',
     'corsheaders',
     'comments',
+    'drf_yasg',
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR)
@@ -105,7 +106,7 @@ DATABASES = {
         'NAME': "tp_shop",
         'USER': "David",
         'PASSWORD': "david_sduk",
-        'HOST': "db",
+        'HOST': "51.250.30.255",
         'PORT': "5432",
     }
 }
